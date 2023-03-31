@@ -17,7 +17,14 @@ const homePageResetButton = document.querySelector(".home-page-reset-button");
 const battlePageResetButton = document.querySelector(
   ".battle-page-reset-button"
 );
-const finalMessage = document.querySelector(".extracted-images-title"); // seleziona l'elemento per il messaggio finale
+// seleziona l'elemento per il messaggio finale
+const finalMessageHome = document.querySelector(
+  ".home-page .extracted-images-title"
+);
+const finalMessageBattle = document.querySelector(
+  ".battle-page .extracted-images-title"
+);
+
 const imgFolderUrl = "./img/"; // definisci l'URL della cartella img
 let allImages = []; // definisci l'array per tutte le immagini disponibili
 let imageIndex = 1; // si parte dall'immagine 1
@@ -88,16 +95,16 @@ function addExtractedImage(imgUrl, extractedImages) {
 
 // Funzione per gestire l'estrazione delle immagini
 function handleDraw(button, currentImage, extractedImages, page) {
-  let extracted;
-
-  if (page === "home") {
-    extracted = extractedHome;
-  } else if (page === "battle") {
-    extracted = extractedBattle;
-  }
+  const extracted = page === "home" ? extractedHome : extractedBattle;
 
   if (extracted.length === allImages.length) {
-    finalMessage.textContent = "Tutti gli ingredienti sono stati estratti!";
+    if (page === "home") {
+      finalMessageHome.textContent =
+        "Tutti gli ingredienti sono stati estratti!";
+    } else {
+      finalMessageBattle.textContent =
+        "Tutti gli ingredienti sono stati estratti!";
+    }
     return;
   }
 
@@ -149,6 +156,7 @@ function handleReset(button, currentImage, extractedImages, page) {
     "Sei sicuro di voler cancellare l'estrazione in corso?"
   );
   if (confirmation) {
+    // Azzera l'array extracted corrispondente alla pagina
     if (page === "home") {
       extractedHome = [];
       localStorage.removeItem("extractedHome");
@@ -156,11 +164,18 @@ function handleReset(button, currentImage, extractedImages, page) {
       extractedBattle = [];
       localStorage.removeItem("extractedBattle");
     }
+
     extractedImages.innerHTML = "";
-    finalMessage.textContent = "Immagini Estratte";
+
+    // Aggiorna il messaggio nella pagina corrente
+    if (page === "home") {
+      finalMessageHome.textContent = "Immagini Estratte";
+    } else {
+      finalMessageBattle.textContent = "Immagini Estratte";
+    }
 
     // Imposta nuovamente l'attributo "src" dell'immagine corrente con il percorso dell'immagine della mascotte
-    currentImage.setAttribute("src", "./favicon/pizza.png");
+    currentImage.setAttribute("src", "/favicon/pizza.png");
   }
 }
 
