@@ -21,7 +21,10 @@ const finalMessage = document.querySelector(".extracted-images-title"); // selez
 const imgFolderUrl = "./img/"; // definisci l'URL della cartella img
 let allImages = []; // definisci l'array per tutte le immagini disponibili
 let imageIndex = 1; // si parte dall'immagine 1
-let extracted = JSON.parse(localStorage.getItem("extracted")) || [];
+
+let extractedHome = JSON.parse(localStorage.getItem("extractedHome")) || [];
+let extractedBattle = JSON.parse(localStorage.getItem("extractedBattle")) || [];
+
 const homePage = document.querySelector(".home-page");
 const battlePage = document.querySelector(".battle-page");
 const goToBattleImage = document.querySelector(".home-page .index-link");
@@ -84,7 +87,15 @@ function addExtractedImage(imgUrl, extractedImages) {
 }
 
 // Funzione per gestire l'estrazione delle immagini
-function handleDraw(button, currentImage, extractedImages) {
+function handleDraw(button, currentImage, extractedImages, page) {
+  let extracted;
+
+  if (page === "home") {
+    extracted = extractedHome;
+  } else if (page === "battle") {
+    extracted = extractedBattle;
+  }
+
   if (extracted.length === allImages.length) {
     finalMessage.textContent = "Tutti gli ingredienti sono stati estratti!";
     return;
@@ -99,7 +110,11 @@ function handleDraw(button, currentImage, extractedImages) {
   extracted.push(randomImage);
 
   // salva l'array extracted in localStorage
-  localStorage.setItem("extracted", JSON.stringify(extracted));
+  if (page === "home") {
+    localStorage.setItem("extractedHome", JSON.stringify(extracted));
+  } else if (page === "battle") {
+    localStorage.setItem("extractedBattle", JSON.stringify(extracted));
+  }
 
   // aggiungi l'immagine estratta alla sezione delle immagini estratte
   addExtractedImage(randomImage, extractedImages);
@@ -109,31 +124,43 @@ function handleDraw(button, currentImage, extractedImages) {
 }
 
 // Aggiungi event listeners ai nuovi pulsanti "Estrai"
+
 homePageDrawButton.addEventListener("click", () => {
-  handleDraw(homePageDrawButton, homePageCurrentImage, homePageExtractedImages);
+  handleDraw(
+    homePageDrawButton,
+    homePageCurrentImage,
+    homePageExtractedImages,
+    "home"
+  );
 });
 
 battlePageDrawButton.addEventListener("click", () => {
   handleDraw(
     battlePageDrawButton,
     battlePageCurrentImage,
-    battlePageExtractedImages
+    battlePageExtractedImages,
+    "battle"
   );
 });
 
 // Funzione per gestire il reset del gioco
-function handleReset(button, currentImage, extractedImages) {
+function handleReset(button, currentImage, extractedImages, page) {
   const confirmation = confirm(
     "Sei sicuro di voler cancellare l'estrazione in corso?"
   );
   if (confirmation) {
-    extracted = [];
-    localStorage.removeItem("extracted");
+    if (page === "home") {
+      extractedHome = [];
+      localStorage.removeItem("extractedHome");
+    } else if (page === "battle") {
+      extractedBattle = [];
+      localStorage.removeItem("extractedBattle");
+    }
     extractedImages.innerHTML = "";
     finalMessage.textContent = "Immagini Estratte";
 
     // Imposta nuovamente l'attributo "src" dell'immagine corrente con il percorso dell'immagine della mascotte
-    currentImage.setAttribute("src", "./favicon/pizza.png");
+    currentImage.setAttribute("src", "/favicon/pizza.png");
   }
 }
 
@@ -142,7 +169,8 @@ homePageResetButton.addEventListener("click", () => {
   handleReset(
     homePageResetButton,
     homePageCurrentImage,
-    homePageExtractedImages
+    homePageExtractedImages,
+    "home"
   );
 });
 
@@ -150,7 +178,8 @@ battlePageResetButton.addEventListener("click", () => {
   handleReset(
     battlePageResetButton,
     battlePageCurrentImage,
-    battlePageExtractedImages
+    battlePageExtractedImages,
+    "battle"
   );
 });
 
