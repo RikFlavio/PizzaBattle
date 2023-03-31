@@ -175,7 +175,7 @@ function handleReset(button, currentImage, extractedImages, page) {
     }
 
     // Imposta nuovamente l'attributo "src" dell'immagine corrente con il percorso dell'immagine della mascotte
-    currentImage.setAttribute("src", "/favicon/pizza.png");
+    currentImage.setAttribute("src", "./favicon/pizza.png");
   }
 }
 
