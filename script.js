@@ -26,7 +26,11 @@ const finalMessageBattle = document.querySelector(
 );
 
 const imgFolderUrl = "./img/"; // definisci l'URL della cartella img
+const imgBattleFolderUrl = "./img_battle/"; // URL della cartella img_battle
+
 let allImages = []; // definisci l'array per tutte le immagini disponibili
+let allBattleImages = []; // definisci l'array per tutte le immagini disponibili nella cartella img_battle
+
 let imageIndex = 1; // si parte dall'immagine 1
 
 let extractedHome = JSON.parse(localStorage.getItem("extractedHome")) || [];
@@ -69,15 +73,41 @@ function fetchNextImage() {
       if (error.message !== "Image not found") {
         console.error("An error occurred:", error);
       } else {
-        // Abilita il pulsante "Estrai" dopo aver caricato tutte le immagini
         if (allImages.length > 0) {
           homePageDrawButton.disabled = false;
+        }
+        // Avvia il caricamento delle immagini della cartella img_battle
+        imageIndex = 1;
+        fetchNextBattleImage();
+      }
+    });
+}
+fetchNextImage();
+
+function fetchNextBattleImage() {
+  const imageUrl = `${imgBattleFolderUrl}img_${imageIndex}.png`;
+  fetch(imageUrl)
+    .then((response) => {
+      if (response.status === 404) {
+        throw new Error("Image not found");
+      }
+      return response.blob();
+    })
+    .then(() => {
+      allBattleImages.push(imageUrl);
+      imageIndex++;
+      fetchNextBattleImage();
+    })
+    .catch((error) => {
+      if (error.message !== "Image not found") {
+        console.error("An error occurred:", error);
+      } else {
+        if (allBattleImages.length > 0) {
           battlePageDrawButton.disabled = false;
         }
       }
     });
 }
-fetchNextImage();
 
 function addExtractedImage(imgUrl, extractedImages) {
   const div = document.createElement("div"); // crea un nuovo elemento <div>
@@ -95,9 +125,10 @@ function addExtractedImage(imgUrl, extractedImages) {
 
 // Funzione per gestire l'estrazione delle immagini
 function handleDraw(button, currentImage, extractedImages, page) {
+  const imagesArray = page === "home" ? allImages : allBattleImages;
   const extracted = page === "home" ? extractedHome : extractedBattle;
 
-  if (extracted.length === allImages.length) {
+  if (extracted.length === imagesArray.length) {
     if (page === "home") {
       finalMessageHome.textContent =
         "Tutti gli ingredienti sono stati estratti!";
@@ -108,9 +139,9 @@ function handleDraw(button, currentImage, extractedImages, page) {
     return;
   }
 
-  let randomImage = allImages[Math.floor(Math.random() * allImages.length)];
+  let randomImage = imagesArray[Math.floor(Math.random() * imagesArray.length)];
   while (extracted.includes(randomImage)) {
-    randomImage = allImages[Math.floor(Math.random() * allImages.length)];
+    randomImage = imagesArray[Math.floor(Math.random() * imagesArray.length)];
   }
 
   // aggiungi l'immagine estratta all'array extracted
@@ -175,7 +206,7 @@ function handleReset(button, currentImage, extractedImages, page) {
     }
 
     // Imposta nuovamente l'attributo "src" dell'immagine corrente con il percorso dell'immagine della mascotte
-    currentImage.setAttribute("src", "./favicon/pizza.png");
+    currentImage.setAttribute("src", "/favicon/pizza.png");
   }
 }
 
