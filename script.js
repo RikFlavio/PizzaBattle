@@ -133,7 +133,9 @@ function restoreExtractedImages(page) {
 function addExtractedImage(imageUrl, container) {
   const imageElement = document.createElement("img");
   imageElement.src = imageUrl;
-  container.appendChild(imageElement);
+
+  // Inserisci l'elemento immagine all'inizio del contenitore
+  container.insertBefore(imageElement, container.firstChild);
 }
 
 function fetchImages(url, imagesArray, callback) {
