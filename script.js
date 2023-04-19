@@ -97,7 +97,14 @@ function restoreAppState() {
 
   // Se la pagina corrente è stata salvata, ripristina la visualizzazione corretta
   if (currentPage) {
-    switchPage(currentPage === "home" ? "battle" : "home", currentPage);
+    // Nascondi tutte le pagine
+    Object.keys(elements).forEach((page) => {
+      elements[page].page.style.display = "none";
+    });
+
+    // Mostra la pagina corrente
+    elements[currentPage].page.style.display = "block";
+    document.body.className = selectors[currentPage].bodyClass;
   }
 }
 
