@@ -91,20 +91,42 @@ function switchPage(fromPage, toPage) {
   // Salva la pagina corrente in localStorage
   localStorage.setItem("currentPage", toPage);
 }
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    // Salva lo stato dell'applicazione nel localStorage
+    saveAppState();
+  } else {
+    // Ripristina lo stato dell'applicazione dal localStorage
+    restoreAppState();
+  }
+});
+
 function restoreAppState() {
   // Carica la pagina corrente dal localStorage
   const currentPage = localStorage.getItem("currentPage");
 
   // Se la pagina corrente è stata salvata, ripristina la visualizzazione corretta
   if (currentPage) {
-    // Nascondi tutte le pagine
-    Object.keys(elements).forEach((page) => {
-      elements[page].page.style.display = "none";
-    });
+    switchPage(currentPage === "home" ? "battle" : "home", currentPage);
+  }
 
-    // Mostra la pagina corrente
-    elements[currentPage].page.style.display = "block";
-    document.body.className = selectors[currentPage].bodyClass;
+  // Ripristina l'estrazione delle immagini per entrambe le pagine
+  restoreExtractedImages("home");
+  restoreExtractedImages("battle");
+}
+
+function restoreExtractedImages(page) {
+  const extracted = page === "home" ? extractedHome : extractedBattle;
+
+  extracted.forEach((imageUrl) => {
+    addExtractedImage(imageUrl, elements[page].extractedImages);
+  });
+
+  if (extracted.length > 0) {
+    elements[page].currentImage.setAttribute(
+      "src",
+      extracted[extracted.length - 1]
+    );
   }
 }
 
@@ -210,3 +232,4 @@ function handleReset(page) {
   }
 }
 restoreAppState();
+
