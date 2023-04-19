@@ -1,141 +1,176 @@
-const homePageCurrentImage = document.querySelector(
-  ".home-page .current-image img"
+// Crea una costante (valore immutabile) per l'URL della cartella delle immagini
+const imgFolderUrl = "./img/";
+
+// Crea una costante per l'URL della cartella delle immagini di battaglia
+const imgBattleFolderUrl = "./img_battle/";
+
+// Crea una costante per la chiave che rappresenta le immagini estratte dalla pagina principale
+const extractedHomeKey = "extractedHome";
+
+// Crea una costante per la chiave che rappresenta le immagini estratte dalla pagina di battaglia
+const extractedBattleKey = "extractedBattle";
+
+// Crea un array vuoto per memorizzare tutte le immagini
+const allImages = [];
+
+// Crea un array vuoto per memorizzare tutte le immagini di battaglia
+const allBattleImages = [];
+
+// Ottieni le immagini estratte dalla pagina principale dal localStorage,
+// e se non ci sono dati, inizializza un array vuoto
+let extractedHome = JSON.parse(localStorage.getItem(extractedHomeKey)) || [];
+
+// Ottieni le immagini estratte dalla pagina di battaglia dal localStorage,
+// e se non ci sono dati, inizializza un array vuoto
+let extractedBattle =
+  JSON.parse(localStorage.getItem(extractedBattleKey)) || [];
+
+const selectors = {
+  // Selettore per gli elementi della pagina home (oggetti annidati che contengono i selettori CSS per gli elementi HTML della pagina home e della pagina battle. )
+  home: {
+    page: ".home-page", // Selettore per l'elemento principale della pagina home
+    currentImage: ".home-page .current-image img", // Selettore per l'immagine corrente nella pagina home
+    extractedImages: ".home-page .extracted-images", // Selettore per le immagini estratte nella pagina home
+    drawButton: ".home-page-draw-button", // Selettore per il pulsante "draw" nella pagina home
+    resetButton: ".home-page-reset-button", // Selettore per il pulsante "reset" nella pagina home
+    finalMessage: ".home-page .extracted-images-title", // Selettore per il messaggio finale nella pagina home
+    bodyClass: "home-page-1", // Classe aggiunta al body quando la pagina home è attiva
+  },
+  // Selettore per gli elementi della pagina battle
+  battle: {
+    page: ".battle-page", // Selettore per l'elemento principale della pagina battle
+    currentImage: ".battle-page .current-image img", // Selettore per l'immagine corrente nella pagina battle
+    extractedImages: ".battle-page .extracted-images", // Selettore per le immagini estratte nella pagina battle
+    drawButton: ".battle-page-draw-button", // Selettore per il pulsante "draw" nella pagina battle
+    resetButton: ".battle-page-reset-button", // Selettore per il pulsante "reset" nella pagina battle
+    finalMessage: ".battle-page .extracted-images-title", // Selettore per il messaggio finale nella pagina battle
+    bodyClass: "battle-page-1", // Classe aggiunta al body quando la pagina battle è attiva
+  },
+};
+
+// Definisci un oggetto chiamato "elements" con due proprietà: "home" e "battle"
+const elements = {
+  // La proprietà "home" è un oggetto vuoto che può essere utilizzato per memorizzare gli elementi della pagina home
+  home: {},
+
+  // La proprietà "battle" è un oggetto vuoto che può essere utilizzato per memorizzare gli elementi della pagina battle
+  battle: {},
+};
+
+// Per ogni chiave nell'oggetto "selectors" (in questo caso, 'home' e 'battle')
+Object.keys(selectors).forEach((page) => {
+  // Per ogni chiave all'interno dell'oggetto corrispondente (ad esempio, 'page', 'currentImage', ecc.)
+  Object.keys(selectors[page]).forEach((key) => {
+    // Seleziona l'elemento HTML corrispondente al selettore CSS
+    // e memorizzalo nell'oggetto "elements" nella posizione corrispondente
+    elements[page][key] = document.querySelector(selectors[page][key]);
+  });
+});
+// non essendo presenti nel ciclo sopra devi aggiungere i due elementi
+elements.home.goToBattleImage = document.querySelector(
+  ".home-page .index-link"
 );
-const battlePageCurrentImage = document.querySelector(
-  ".battle-page .current-image img"
-);
-const homePageExtractedImages = document.querySelector(
-  ".home-page .extracted-images"
-);
-const battlePageExtractedImages = document.querySelector(
-  ".battle-page .extracted-images"
+elements.battle.goToIndexImage = document.querySelector(
+  ".battle-page .index-link"
 );
 
-const homePageDrawButton = document.querySelector(".home-page-draw-button");
-const battlePageDrawButton = document.querySelector(".battle-page-draw-button");
-const homePageResetButton = document.querySelector(".home-page-reset-button");
-const battlePageResetButton = document.querySelector(
-  ".battle-page-reset-button"
-);
-// seleziona l'elemento per il messaggio finale
-const finalMessageHome = document.querySelector(
-  ".home-page .extracted-images-title"
-);
-const finalMessageBattle = document.querySelector(
-  ".battle-page .extracted-images-title"
-);
-
-const imgFolderUrl = "./img/"; // definisci l'URL della cartella img
-const imgBattleFolderUrl = "./img_battle/"; // URL della cartella img_battle
-
-let allImages = []; // definisci l'array per tutte le immagini disponibili
-let allBattleImages = []; // definisci l'array per tutte le immagini disponibili nella cartella img_battle
-
-let imageIndex = 1; // si parte dall'immagine 1
-
-let extractedHome = JSON.parse(localStorage.getItem("extractedHome")) || [];
-let extractedBattle = JSON.parse(localStorage.getItem("extractedBattle")) || [];
-
-const homePage = document.querySelector(".home-page");
-const battlePage = document.querySelector(".battle-page");
-const goToBattleImage = document.querySelector(".home-page .index-link");
-const goToIndexImage = document.querySelector(".battle-page .index-link");
-
-goToBattleImage.addEventListener("click", () => {
-  homePage.style.display = "none";
-  battlePage.style.display = "block";
-  document.body.classList.remove("home-page-1");
-  document.body.classList.add("battle-page-1");
+elements.home.goToBattleImage.addEventListener("click", () => {
+  switchPage("home", "battle");
 });
 
-goToIndexImage.addEventListener("click", () => {
-  homePage.style.display = "block";
-  battlePage.style.display = "none";
-  document.body.classList.remove("battle-page-1");
-  document.body.classList.add("home-page-1");
+elements.battle.goToIndexImage.addEventListener("click", () => {
+  switchPage("battle", "home");
 });
 
-function fetchNextImage() {
-  const imageUrl = `${imgFolderUrl}img_${imageIndex}.png`;
-  fetch(imageUrl)
-    .then((response) => {
-      if (response.status === 404) {
-        throw new Error("Image not found");
-      }
-      return response.blob();
-    })
-    .then(() => {
-      allImages.push(imageUrl);
-      imageIndex++;
-      fetchNextImage();
-    })
-    .catch((error) => {
-      if (error.message !== "Image not found") {
-        console.error("An error occurred:", error);
-      } else {
-        if (allImages.length > 0) {
-          homePageDrawButton.disabled = false;
-        }
-        // Avvia il caricamento delle immagini della cartella img_battle
-        imageIndex = 1;
-        fetchNextBattleImage();
-      }
-    });
+function switchPage(fromPage, toPage) {
+  elements[fromPage].page.style.display = "none";
+  elements[toPage].page.style.display = "block";
+  document.body.classList.remove(selectors[fromPage].bodyClass);
+  document.body.classList.add(selectors[toPage].bodyClass);
+
+  // Salva la pagina corrente in localStorage
+  localStorage.setItem("currentPage", toPage);
 }
-fetchNextImage();
+function restoreAppState() {
+  // Carica la pagina corrente dal localStorage
+  const currentPage = localStorage.getItem("currentPage");
 
-function fetchNextBattleImage() {
-  const imageUrl = `${imgBattleFolderUrl}img_${imageIndex}.png`;
-  fetch(imageUrl)
-    .then((response) => {
-      if (response.status === 404) {
-        throw new Error("Image not found");
-      }
-      return response.blob();
-    })
-    .then(() => {
-      allBattleImages.push(imageUrl);
-      imageIndex++;
-      fetchNextBattleImage();
-    })
-    .catch((error) => {
-      if (error.message !== "Image not found") {
-        console.error("An error occurred:", error);
-      } else {
-        if (allBattleImages.length > 0) {
-          battlePageDrawButton.disabled = false;
-        }
-      }
-    });
-}
-
-function addExtractedImage(imgUrl, extractedImages) {
-  const div = document.createElement("div"); // crea un nuovo elemento <div>
-  const img = document.createElement("img"); // crea un nuovo elemento <img>
-  img.setAttribute("src", imgUrl); // imposta l'attributo src dell'elemento <img> con l'URL dell'immagine
-  div.appendChild(img); // aggiunge l'elemento <img> come figlio dell'elemento <div>
-
-  // aggiunge l'elemento <div> come primo figlio dell'elemento extractedImages
-  if (extractedImages.firstChild) {
-    extractedImages.insertBefore(div, extractedImages.firstChild);
-  } else {
-    extractedImages.appendChild(div);
+  // Se la pagina corrente è stata salvata, ripristina la visualizzazione corretta
+  if (currentPage) {
+    switchPage(currentPage === "home" ? "battle" : "home", currentPage);
   }
 }
 
-// Funzione per gestire l'estrazione delle immagini
-function handleDraw(button, currentImage, extractedImages, page) {
+function addExtractedImage(imageUrl, container) {
+  const imageElement = document.createElement("img");
+  imageElement.src = imageUrl;
+  container.appendChild(imageElement);
+}
+
+function fetchImages(url, imagesArray, callback) {
+  function fetchNextImage(imageIndex) {
+    const imageUrl = `${url}img_${imageIndex}.png`;
+    fetch(imageUrl)
+      .then((response) => {
+        if (response.status === 404) {
+          throw new Error("Image not found");
+        }
+        return response.blob();
+      })
+      .then(() => {
+        imagesArray.push(imageUrl);
+        fetchNextImage(imageIndex + 1);
+      })
+      .catch((error) => {
+        if (error.message !== "Image not found") {
+          console.error("An error occurred:", error);
+        } else {
+          if (imagesArray.length > 0) {
+            callback();
+          }
+        }
+      });
+  }
+  fetchNextImage(1);
+}
+
+fetchImages(imgFolderUrl, allImages, () => {
+  elements.home.drawButton.disabled = false;
+  fetchImages(imgBattleFolderUrl, allBattleImages, () => {
+    elements.battle.drawButton.disabled = false;
+  });
+});
+
+elements.home.drawButton.addEventListener("click", () => {
+  handleDraw("home");
+});
+
+elements.battle.drawButton.addEventListener("click", () => {
+  handleDraw("battle");
+});
+
+elements.home.resetButton.addEventListener("click", () => {
+  handleReset("home");
+});
+
+elements.battle.resetButton.addEventListener("click", () => {
+  handleReset("battle");
+});
+
+window.addEventListener("beforeunload", (event) => {
+  event.preventDefault();
+  event.returnValue =
+    "Sei sicuro di voler aggiornare la pagina? I progressi potrebbero andare persi.";
+});
+
+function handleDraw(page) {
   const imagesArray = page === "home" ? allImages : allBattleImages;
   const extracted = page === "home" ? extractedHome : extractedBattle;
+  const extractedKey = page === "home" ? extractedHomeKey : extractedBattleKey;
 
   if (extracted.length === imagesArray.length) {
-    if (page === "home") {
-      finalMessageHome.textContent =
-        "Tutti gli ingredienti sono stati estratti!";
-    } else {
-      finalMessageBattle.textContent =
-        "Tutti gli ingredienti sono stati estratti!";
-    }
+    elements[page].finalMessage.textContent =
+      "Tutti gli ingredienti sono stati estratti!";
     return;
   }
 
@@ -144,94 +179,27 @@ function handleDraw(button, currentImage, extractedImages, page) {
     randomImage = imagesArray[Math.floor(Math.random() * imagesArray.length)];
   }
 
-  // aggiungi l'immagine estratta all'array extracted
   extracted.push(randomImage);
+  localStorage.setItem(extractedKey, JSON.stringify(extracted));
 
-  // salva l'array extracted in localStorage
-  if (page === "home") {
-    localStorage.setItem("extractedHome", JSON.stringify(extracted));
-  } else if (page === "battle") {
-    localStorage.setItem("extractedBattle", JSON.stringify(extracted));
-  }
-
-  // aggiungi l'immagine estratta alla sezione delle immagini estratte
-  addExtractedImage(randomImage, extractedImages);
-
-  // mostra l'immagine più recente in alto al centro
-  currentImage.setAttribute("src", randomImage);
+  addExtractedImage(randomImage, elements[page].extractedImages);
+  elements[page].currentImage.setAttribute("src", randomImage);
 }
 
-// Aggiungi event listeners ai nuovi pulsanti "Estrai"
-
-homePageDrawButton.addEventListener("click", () => {
-  handleDraw(
-    homePageDrawButton,
-    homePageCurrentImage,
-    homePageExtractedImages,
-    "home"
-  );
-});
-
-battlePageDrawButton.addEventListener("click", () => {
-  handleDraw(
-    battlePageDrawButton,
-    battlePageCurrentImage,
-    battlePageExtractedImages,
-    "battle"
-  );
-});
-
-// Funzione per gestire il reset del gioco
-function handleReset(button, currentImage, extractedImages, page) {
+function handleReset(page) {
+  const extracted = page === "home" ? extractedHome : extractedBattle;
+  const extractedKey = page === "home" ? extractedHomeKey : extractedBattleKey;
   const confirmation = confirm(
     "Sei sicuro di voler cancellare l'estrazione in corso?"
   );
   if (confirmation) {
-    // Azzera l'array extracted corrispondente alla pagina
-    if (page === "home") {
-      extractedHome = [];
-      localStorage.removeItem("extractedHome");
-    } else if (page === "battle") {
-      extractedBattle = [];
-      localStorage.removeItem("extractedBattle");
-    }
+    const extracted = page === "home" ? extractedHome : extractedBattle;
+    extracted.length = 0;
+    localStorage.removeItem(extractedKey);
 
-    extractedImages.innerHTML = "";
-
-    // Aggiorna il messaggio nella pagina corrente
-    if (page === "home") {
-      finalMessageHome.textContent = "Immagini Estratte";
-    } else {
-      finalMessageBattle.textContent = "Immagini Estratte";
-    }
-
-    // Imposta nuovamente l'attributo "src" dell'immagine corrente con il percorso dell'immagine della mascotte
-    currentImage.setAttribute("src", "./favicon/pizza.png");
+    elements[page].extractedImages.innerHTML = "";
+    elements[page].finalMessage.textContent = "Immagini Estratte";
+    elements[page].currentImage.setAttribute("src", "./favicon/pizza.png");
   }
 }
-
-// Aggiungi event listeners ai nuovi pulsanti "Reset"
-homePageResetButton.addEventListener("click", () => {
-  handleReset(
-    homePageResetButton,
-    homePageCurrentImage,
-    homePageExtractedImages,
-    "home"
-  );
-});
-
-battlePageResetButton.addEventListener("click", () => {
-  handleReset(
-    battlePageResetButton,
-    battlePageCurrentImage,
-    battlePageExtractedImages,
-    "battle"
-  );
-});
-
-// allert per evitare aggiornamento pagina
-window.addEventListener("beforeunload", (event) => {
-  event.preventDefault();
-  event.returnValue =
-    "Sei sicuro di voler aggiornare la pagina? I progressi potrebbero andare persi.";
-});
+restoreAppState();
